@@ -51,18 +51,56 @@ impl Day for Day03 {
 
     type Output2 = usize;
 
-    fn part_2(_input: &Self::Input) -> Self::Output2 {
-        unimplemented!("part_2")
+    fn part_2(input: &Self::Input) -> Self::Output2 {
+        input
+            .into_iter()
+            .map(|x| {
+                let mut list_digits: Vec<String> = vec![];
+                let mut remaining_digits: usize = 12;
+                let mut last_index: i32 = -1;
+                while remaining_digits > 0 {
+                    let start_index: usize = (last_index + 1) as usize;
+                    let (index, max) = x[start_index..x.len() - (remaining_digits - 1)]
+                        .chars()
+                        .enumerate()
+                        .collect::<Vec<_>>()
+                        .into_iter()
+                        .rev()
+                        .map(|(i, c)| (i, c.to_digit(10).unwrap() as u8))
+                        .max_by_key(|(_, c)| *c)
+                        .unwrap();
+                    last_index = (index + start_index) as i32;
+                    list_digits.push(max.to_string());
+                    remaining_digits -= 1;
+                }
+                // println!("{} {}", list_digits.concat(), x);
+                list_digits.concat().parse::<usize>().unwrap()
+            })
+            .sum::<usize>()
     }
 }
-
-#[test]
-fn test_part1() {
-    const INPUT: &str = "987654321111111
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_part1() {
+        const INPUT: &str = "987654321111111
 811111111111119
 234234234234278
 818181911112111";
 
-    let parsed = Day03::parser(&mut INPUT).unwrap();
-    assert_eq!(Day03::part_1(&parsed), 357);
+        let parsed = Day03::parser(&mut INPUT).unwrap();
+        assert_eq!(Day03::part_1(&parsed), 357);
+    }
+
+    #[test]
+    fn test_part2() {
+        const INPUT: &str = "987654321111111
+811111111111119
+234234234234278
+818181911112111";
+
+        let parsed = Day03::parser(&mut INPUT).unwrap();
+        assert_eq!(Day03::part_2(&parsed), 3121910778619);
+    }
 }
