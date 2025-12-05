@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use winnow::ascii::{digit1, line_ending};
 use winnow::combinator::{opt, separated, separated_pair, terminated};
 use winnow::{Parser, Result};
@@ -65,7 +66,18 @@ impl Day for Day05 {
 
     type Output2 = usize;
 
-    fn part_2(_input: &Self::Input) -> Self::Output2 {
-        unimplemented!("part_2")
+    fn part_2(input: &Self::Input) -> Self::Output2 {
+        let mut result = 0;
+        let mut last_id = 0;
+        for range in input.fresh_id_range.iter().sorted() {
+            if range.0 > last_id {
+                result += range.1 - range.0 + 1;
+                last_id = range.1;
+            } else if range.0 <= last_id && range.1 > last_id {
+                result += range.1 - last_id;
+                last_id = range.1;
+            }
+        }
+        result as usize
     }
 }
