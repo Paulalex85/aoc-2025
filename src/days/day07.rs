@@ -1,5 +1,6 @@
 use crate::days::Day;
-use std::collections::BTreeSet;
+use itertools::Itertools;
+use std::collections::{BTreeSet, HashMap, HashSet};
 use winnow::ascii::line_ending;
 use winnow::combinator::{opt, separated, terminated};
 use winnow::token::take_while;
@@ -49,7 +50,36 @@ impl Day for Day07 {
 
     type Output2 = usize;
 
-    fn part_2(_input: &Self::Input) -> Self::Output2 {
-        unimplemented!("part_2")
+    fn part_2(input: &Self::Input) -> Self::Output2 {
+        let mut paths: HashMap<usize, u64> = HashMap::new();
+
+        input.iter().for_each(|line| {
+            if paths.is_empty() {
+                let start = line.find('S');
+                if start.is_some() {
+                    paths.insert(start.unwrap(), 1);
+                }
+            } else {
+                paths
+                    .clone()
+                    .iter()
+                    .sorted()
+                    .for_each(|(index_path, value)| {
+                        if line.chars().nth(*index_path).unwrap() == '^' {
+                            paths.insert(
+                                *index_path - 1,
+                                *value + paths.get(&(index_path - 1)).unwrap_or(&0),
+                            );
+                            paths.insert(
+                                *index_path + 1,
+                                *value + paths.get(&(index_path + 1)).unwrap_or(&0),
+                            );
+                            paths.remove(index_path);
+                        }
+                    })
+            }
+        });
+
+        paths.values().copied().sum::<u64>() as usize
     }
 }
