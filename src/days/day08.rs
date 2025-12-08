@@ -36,21 +36,36 @@ impl Day for Day08 {
 
     fn part_1(input: &Self::Input) -> Self::Output1 {
         let mut distances: HashMap<(usize, usize), f64> = HashMap::new();
+        generate_distances(input, &mut distances);
         let mut circuits: Vec<Vec<usize>> = vec![];
-        for index_position in 0..input.len() {
-            for index_other_position in index_position + 1..input.len() {
-                distances.insert(
-                    (index_position, index_other_position),
-                    compute_distance(input[index_position], input[index_other_position]),
-                );
-            }
-        }
 
-        for (position_pair, _) in distances
+        join_first_1000(&mut distances, &mut circuits);
+        circuits
+            .iter()
+            .map(|circuit| circuit.len())
+            .sorted()
+            .rev()
+            .take(3)
+            .product()
+    }
+
+    type Output2 = i64;
+
+    fn part_2(input: &Self::Input) -> Self::Output2 {
+        let mut distances: HashMap<(usize, usize), f64> = HashMap::new();
+        generate_distances(input, &mut distances);
+        let mut circuits: Vec<Vec<usize>> = vec![];
+        let mut last_junction: (usize, usize) = (0, 0);
+
+        join_first_1000(&mut distances, &mut circuits);
+
+        let remaining_distances: Vec<((usize, usize), f64)> = distances
             .into_iter()
             .sorted_by(|a, b| a.1.partial_cmp(&b.1).unwrap())
-            .take(1000)
-        {
+            .skip(1000)
+            .collect();
+
+        for (position_pair, _) in remaining_distances {
             let found1 = circuits
                 .iter()
                 .find_position(|circuit| circuit.contains(&position_pair.0));
@@ -68,30 +83,68 @@ impl Day for Day08 {
 
                     circuits[idx1] = merged;
                     circuits.remove(idx2);
+                    last_junction = position_pair;
                 }
             } else if found1.is_some() {
                 let index = found1.unwrap().0;
                 circuits[index].push(position_pair.1);
+                last_junction = position_pair;
             } else if found2.is_some() {
                 let index = found2.unwrap().0;
                 circuits[index].push(position_pair.0);
+                last_junction = position_pair;
             } else {
                 circuits.push(vec![position_pair.0, position_pair.1]);
             }
         }
-        circuits
-            .iter()
-            .map(|circuit| circuit.len())
-            .sorted()
-            .rev()
-            .take(3)
-            .product()
+        input[last_junction.0].x as i64 * input[last_junction.1].x as i64
     }
+}
 
-    type Output2 = usize;
+fn join_first_1000(distances: &mut HashMap<(usize, usize), f64>, circuits: &mut Vec<Vec<usize>>) {
+    for (position_pair, _) in distances
+        .into_iter()
+        .sorted_by(|a, b| a.1.partial_cmp(&b.1).unwrap())
+        .take(1000)
+    {
+        let found1 = circuits
+            .iter()
+            .find_position(|circuit| circuit.contains(&position_pair.0));
+        let found2 = circuits
+            .iter()
+            .find_position(|circuit| circuit.contains(&position_pair.1));
+        if found1.is_some() && found2.is_some() {
+            if found1.unwrap() == found2.unwrap() {
+                continue;
+            } else {
+                let idx1 = found1.unwrap().0;
+                let idx2 = found2.unwrap().0;
+                let mut merged = found1.unwrap().1.clone();
+                merged.extend(found2.unwrap().1.iter().copied());
 
-    fn part_2(_input: &Self::Input) -> Self::Output2 {
-        unimplemented!("part_2")
+                circuits[idx1] = merged;
+                circuits.remove(idx2);
+            }
+        } else if found1.is_some() {
+            let index = found1.unwrap().0;
+            circuits[index].push(position_pair.1);
+        } else if found2.is_some() {
+            let index = found2.unwrap().0;
+            circuits[index].push(position_pair.0);
+        } else {
+            circuits.push(vec![position_pair.0, position_pair.1]);
+        }
+    }
+}
+
+fn generate_distances(input: &Vec<Position>, distances: &mut HashMap<(usize, usize), f64>) {
+    for index_position in 0..input.len() {
+        for index_other_position in index_position + 1..input.len() {
+            distances.insert(
+                (index_position, index_other_position),
+                compute_distance(input[index_position], input[index_other_position]),
+            );
+        }
     }
 }
 
