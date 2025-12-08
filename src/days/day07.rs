@@ -1,6 +1,6 @@
 use crate::days::Day;
 use itertools::Itertools;
-use std::collections::{BTreeSet, HashMap, HashSet};
+use std::collections::{BTreeSet, HashMap};
 use winnow::ascii::line_ending;
 use winnow::combinator::{opt, separated, terminated};
 use winnow::token::take_while;
