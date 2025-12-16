@@ -15,4 +15,4 @@ reqwest = { version = "0.12", default-features = false, features = [
 ] }
 winnow = "0.7"
 log = "0.4.28"
-z3 =  { version = "0.19.6", features = ["static-link-z3"] }
+#z3 =  { version = "0.19.6", features = ["static-link-z3"] }

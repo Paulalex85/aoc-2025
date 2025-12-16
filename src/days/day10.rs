@@ -4,8 +4,8 @@ use winnow::ascii::{digit1, line_ending, space0, space1};
 use winnow::combinator::{delimited, opt, separated, terminated};
 use winnow::token::take_while;
 use winnow::{Parser, Result, seq};
-use z3::ast::Int;
-use z3::{Optimize, SatResult};
+// use z3::ast::Int;
+// use z3::{Optimize, SatResult};
 
 pub struct Day10;
 
@@ -117,37 +117,37 @@ pub fn shortest_button_pressed_for_joltages(
     target: Vec<u16>,
     buttons: Vec<Vec<u16>>,
 ) -> Option<u64> {
-    let opt = Optimize::new();
-
-    let button_presses: Vec<_> = (0..buttons.len())
-        .map(|i| Int::new_const(format!("btn_{}", i)))
-        .collect();
-
-    for press in &button_presses {
-        opt.assert(&press.ge(&Int::from_i64(0)));
-    }
-
-    for pos in 0..target.len() {
-        let mut sum = Int::from_i64(0);
-
-        for (btn_idx, button) in buttons.iter().enumerate() {
-            if button.contains(&(pos as u16)) {
-                sum = Int::add(&[&sum, &button_presses[btn_idx]]);
-            }
-        }
-
-        opt.assert(&sum.eq(&Int::from_i64(target[pos] as i64)));
-    }
-
-    let total = Int::add(&button_presses.iter().map(|x| x).collect::<Vec<_>>());
-    opt.minimize(&total);
-
-    if opt.check(&[]) == SatResult::Sat {
-        if let Some(model) = opt.get_model() {
-            let result = model.eval(&total, true).unwrap().as_i64().unwrap_or(0) as u64;
-            return Some(result);
-        }
-    }
+    // let opt = Optimize::new();
+    //
+    // let button_presses: Vec<_> = (0..buttons.len())
+    //     .map(|i| Int::new_const(format!("btn_{}", i)))
+    //     .collect();
+    //
+    // for press in &button_presses {
+    //     opt.assert(&press.ge(&Int::from_i64(0)));
+    // }
+    //
+    // for pos in 0..target.len() {
+    //     let mut sum = Int::from_i64(0);
+    //
+    //     for (btn_idx, button) in buttons.iter().enumerate() {
+    //         if button.contains(&(pos as u16)) {
+    //             sum = Int::add(&[&sum, &button_presses[btn_idx]]);
+    //         }
+    //     }
+    //
+    //     opt.assert(&sum.eq(&Int::from_i64(target[pos] as i64)));
+    // }
+    //
+    // let total = Int::add(&button_presses.iter().map(|x| x).collect::<Vec<_>>());
+    // opt.minimize(&total);
+    //
+    // if opt.check(&[]) == SatResult::Sat {
+    //     if let Some(model) = opt.get_model() {
+    //         let result = model.eval(&total, true).unwrap().as_i64().unwrap_or(0) as u64;
+    //         return Some(result);
+    //     }
+    // }
     None
 }
 

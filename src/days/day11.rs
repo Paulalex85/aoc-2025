@@ -52,9 +52,40 @@ impl Day for Day11 {
         found
     }
 
-    type Output2 = usize;
+    type Output2 = u64;
 
-    fn part_2(_input: &Self::Input) -> Self::Output2 {
-        unimplemented!("part_2")
+    fn part_2(input: &Self::Input) -> Self::Output2 {
+        let mut memo: HashMap<(String, bool, bool), u64> = HashMap::new();
+        dfs(input, &mut memo, "svr".to_string(), false, false)
+            .try_into()
+            .unwrap()
     }
+}
+
+pub fn dfs(
+    nodes: &HashMap<String, Vec<String>>,
+    memo: &mut HashMap<(String, bool, bool), u64>,
+    node: String,
+    has_fft: bool,
+    has_dac: bool,
+) -> u64 {
+    if node == "out" {
+        return if has_fft && has_dac { 1 } else { 0 };
+    }
+    let next_nodes = nodes.get(&node).unwrap();
+    let has_fft = has_fft || node == "fft";
+    let has_dac = has_dac || node == "dac";
+
+    next_nodes
+        .iter()
+        .map(|node| {
+            if let Some(result_memo) = memo.get(&(node.clone(), has_fft, has_dac)) {
+                *result_memo
+            } else {
+                let result_path = dfs(nodes, memo, node.clone(), has_fft, has_dac);
+                memo.insert((node.clone(), has_fft, has_dac), result_path);
+                result_path
+            }
+        })
+        .sum()
 }
